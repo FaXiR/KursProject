@@ -11,7 +11,7 @@ namespace KursProject.Modules
     /// <summary>
     /// Упрощенное взаимодействие с БД Access
     /// </summary>
-    class UsingAccess
+    public class UsingAccess
     {
         #region простой участок кода
 

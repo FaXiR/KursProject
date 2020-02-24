@@ -5,8 +5,121 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KursProject"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Архив дел" Height="450" Width="800">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Rectangle Fill="#FFE5E5FF"/>
+            <StackPanel>
+                <Grid>
+                    <Image Source="Source/RosReestr.png" Width="120" Margin="10"/>
+                </Grid>
+                <Grid>
+                    <Rectangle Fill="#FFE5E5FF" MouseEnter="MoEnter" MouseLeave="MoLeave" MouseLeftButtonDown="BusPageShow"/>
+                    <Label Content="Список дел" IsHitTestVisible="False" FontSize="14" FontWeight="Bold"/>
+                    <Label Content="" x:Name="BusCount" IsHitTestVisible="False" Margin="0,16,0,0" Foreground="#FF515151" />
+                </Grid>
+                <Grid>
+                    <Rectangle Fill="#FFE5E5FF" MouseEnter="MoEnter" MouseLeave="MoLeave" MouseLeftButtonDown="VieBusPageShow"/>
+                    <Label Content="Обзор дела" IsHitTestVisible="False" FontSize="14" FontWeight="Bold"/>
+                    <Label Content="" x:Name="ViewBus" IsHitTestVisible="False" Margin="0,16,0,0" Foreground="#FF515151" />
+                </Grid>
+                <Grid>
+                    <Rectangle Fill="#FFE5E5FF" MouseEnter="MoEnter" MouseLeave="MoLeave" MouseLeftButtonDown="VieDocPageShow"/>
+                    <Label Content="Обзор документа" IsHitTestVisible="False" FontSize="14" FontWeight="Bold"/>
+                    <Label Content="" x:Name="ViewDoc" IsHitTestVisible="False" Margin="0,16,0,0" Foreground="#FF515151" />
+                </Grid>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1">
+            <!-- Грид списка дел -->
+            <Grid x:Name="ListBusiness" d:IsHidden="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="24"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Label Content="Список дел" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="выбрана запись с номером *" x:Name="Focu" FontSize="16" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr" SelectedCellsChanged="DaGr_SelectedCellsChanged" IsReadOnly="True"/>
+                </Grid>
+
+                <Grid Grid.Row="2" Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="ListBusinessFoundField" Width="157" Height="22" Text="" Margin="8,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="Введите номер дела для поиска"/>
+                        <Button Content="Найти" Click="ListBusinessFoundClick" Width="105" Height="22" Margin="0,1"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="3" Margin="10,0">
+                    <Button Content="Перейти" Margin="10,8,0,10" HorizontalAlignment="Left" Width="75" Click="ListBusinessEnterClick"/>
+                    <Button Content="Добавить" Margin="90,8,0,10" HorizontalAlignment="Left" Width="75" Click="ListBusinessAddClick"/>
+                    <Button Content="Сброс/Обновить" Margin="170,8,0,10" HorizontalAlignment="Left" Width="106" Click="ListBusinessResetClick"/>
+                    <Button Content="Удалить" Margin="0,8,0,10" HorizontalAlignment="Right" Width="75" Click="ListBusinessDeleteClicl"/>
+                </Grid>
+            </Grid>
+
+            <!-- Грид обзора дела -->
+            <Grid x:Name="ViewBusiness" Visibility="Hidden" IsVisibleChanged="ViewBusiness_IsVisibleChanged">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="146"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Label Content="Обзор дела:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="" Margin="109,5.5,0,0" x:Name="ViewBussinesLabel"/>
+                </Grid>
+                <StackPanel Grid.Row="1" VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Width="160" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <TextBlock Margin="2" Text="Дата введения на хранение:" HorizontalAlignment="Right" Height="20"/>
+                            <TextBlock Margin="2" Text="Дата открытия дела:" HorizontalAlignment="Right" Height="20"/>
+                            <TextBlock Margin="2" Text="Дата закрытия дела:" HorizontalAlignment="Right" Height="20"/>
+                            <TextBlock Margin="2" Text="Заверитель:" HorizontalAlignment="Right" Height="20"/>
+                        </StackPanel>
+                        <StackPanel Width="160" Margin="5,0,0,0">
+                            <TextBox Margin="2" Text="" Height="20" x:Name="ViewBusinessDateEnter"/>
+                            <TextBox Margin="2" Text="" Height="20" x:Name="ViewBusinessDateOpen"/>
+                            <TextBox Margin="2" Text="" Height="20" x:Name="ViewBusinessDatelose"/>
+                            <TextBox Margin="2" Text="" Height="20" x:Name="ViewBusinessWitness"/>
+                        </StackPanel>
+                        <Grid>
+                            <TextBlock Text="Комментарии" Margin="5,2,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                            <TextBox TextWrapping="Wrap" Margin="5,25,4,2" MinWidth="100" Width="200" x:Name="ViewBusinessComments"/>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="52,2,0,2" Text="Причина открытия:" HorizontalAlignment="Right" Height="20"/>
+                        <TextBox Margin="8,0" Text="" Height="20" Width="363" x:Name="ViewBusinessReason"/>
+                    </StackPanel>
+                    <Button Height="22" Width="140" Content="Сохранить изменения" Margin="307,2,0,2" Click="ViewBusinessChangeBusiness"/>
+                </StackPanel>
+
+                <Grid Grid.Row="2">
+                    <Label Content="Список документов" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="выбрана запись с номером *" x:Name="Focu2" FontSize="16" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid Grid.Row="5">
+                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr2" SelectedCellsChanged="DaGr2_SelectedCellsChanged" IsReadOnly="True"/>
+                </Grid>
+
+
+            </Grid>
+
+            <!-- Грид обозора декумента -->
+            <Grid x:Name="ViewDocument"  Visibility="Hidden" d:IsHidden="True"/>
+        </Grid>
     </Grid>
 </Window>
