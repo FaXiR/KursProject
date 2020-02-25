@@ -119,9 +119,11 @@ namespace KursProject.Modules
             if (AutoOpen)
                 ConnectOpen();
 
-            OleDbCommand command = new OleDbCommand();
-            command.Connection = myConnection;
-            command.CommandText = SQLRequest;
+            OleDbCommand command = new OleDbCommand
+            {
+                Connection = myConnection,
+                CommandText = SQLRequest
+            };
 
             OleDbDataAdapter da = new OleDbDataAdapter(command);
             DataTable dt = new DataTable();

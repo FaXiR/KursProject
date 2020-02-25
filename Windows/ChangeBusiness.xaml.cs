@@ -28,10 +28,21 @@ namespace KursProject.Windows
         {
             this.DialogResult = true;
         }
+
         public string Busi
         {
             get { return Business.Text; }
             set { Business.Text = value; }
+        }
+        public string BusiTitile
+        {
+            get { return BusinessTextBlock.Text; }
+            set { BusinessTextBlock.Text = value; }
+        }
+        public new string Title
+        {
+            get { return TitleWindow.Title; }
+            set { TitleWindow.Title = value; }
         }
     }
 }

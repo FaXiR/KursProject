@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,6 +63,10 @@ namespace KursProject
 
         string DocView
         {
+            get
+            {
+                return ViewDoc.Content.ToString();
+            }
             set
             {
                 ViewDoc.Content = value;
@@ -72,10 +77,28 @@ namespace KursProject
         {
             InitializeComponent();
             {
+                try
+                {
+                    string way = File.ReadAllLines("db.txt")[0];
+                    if (way != "")
+                    {
+                        BDway = way;
+                    }
+                }
+                catch
+                {
+
+                }
+
                 bool sucessConnection = CreateConnection(BDway);
-                // MessageBox.Show("Статус подключения: " + sucessConnection);
+
                 if (!sucessConnection)
+                {
+                    MessageBox.Show("Не удалось подключится к базе данных, пожалуйста, обратитесь к администратору");
                     return;
+
+                }
+
             }
 
             UsAc.AutoOpen = true;
@@ -129,6 +152,17 @@ namespace KursProject
             ViewBusiness.Visibility = Visibility.Hidden;
             ViewDocument.Visibility = Visibility.Visible;
         }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MessageBox.Show("Выйти из программы?", "Выход", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                e.Cancel = false;
+            }
+        }
         #endregion  
 
         #region код списка дел
@@ -153,6 +187,11 @@ namespace KursProject
             if (DaGr.SelectedIndex == -1)
             {
                 MessageBox.Show("Запись не выбрана");
+                return;
+            }
+
+            if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+            {
                 return;
             }
 
@@ -224,7 +263,6 @@ namespace KursProject
                 ViewBusinessDateEnter.Text = value;
             }
         }
-
         private string _viewBusinessDateOpen
         {
             get
@@ -236,7 +274,6 @@ namespace KursProject
                 ViewBusinessDateOpen.Text = value;
             }
         }
-
         private string _viewBusinessDatelose
         {
             get
@@ -248,7 +285,6 @@ namespace KursProject
                 ViewBusinessDatelose.Text = value;
             }
         }
-
         private string _viewBusinessWitness
         {
             get
@@ -260,7 +296,6 @@ namespace KursProject
                 ViewBusinessWitness.Text = value;
             }
         }
-
         private string _viewBusinessComments
         {
             get
@@ -272,7 +307,6 @@ namespace KursProject
                 ViewBusinessComments.Text = value;
             }
         }
-
         private string _viewBusinessReason
         {
             get
@@ -330,9 +364,70 @@ namespace KursProject
         }
         private void DaGr2_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            Focu2.Content = "Выбрана запись с номером " + DaGr.SelectedIndex;
+            Focu2.Content = "Выбрана запись с номером " + DaGr2.SelectedIndex;
         }
 
         #endregion
+
+        private void ListBusinessDeleteClicl2(object sender, RoutedEventArgs e)
+        {
+            if (DaGr2.SelectedIndex == -1)
+            {
+                MessageBox.Show("Запись не выбрана");
+                return;
+            }
+
+            if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            string DeleteRecord = tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString();
+            try
+            {
+                UsAc.RequestWithResponse(@"Delete FROM Документ where Документ.Номер_документа = """ + DeleteRecord + @"""");
+                MessageBox.Show("Запись была удалена, обновите таблицу ");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                return;
+            }
+        }
+
+        private void ListBusinessResetClick2(object sender, RoutedEventArgs e)
+        {
+            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @"""");
+            DaGr2.ItemsSource = tab2;
+        }
+
+        private void ListBusinessAddClick2(object sender, RoutedEventArgs e)
+        {
+            if (DaGr.SelectedIndex == -1)
+            {
+                MessageBox.Show("Запись не выбрана");
+                return;
+            }
+
+            long BusibessNum = 1 + Convert.ToInt64(UsAc.Request("SELECT MAX(Номер_документа) as Номер_документа From Документ").Table.Rows[0]["Номер_документа"].ToString());
+
+            UsAc.RequestWithResponse(@"INSERT INTO Документ (Номер_дела, Номер_документа) Values (""" + BusinessView + @""", """ + BusibessNum.ToString() + @""")");
+            DocView = BusibessNum.ToString() + " - " + "*название документа*";
+
+            ListBusiness.Visibility = Visibility.Hidden;
+            ViewBusiness.Visibility = Visibility.Hidden;
+            ViewDocument.Visibility = Visibility.Visible;
+        }
+
+        private void ListBusinessEnterClick2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
+        {
+            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @""" and Документ.Номер_документа Like ""%" + ListBusinessFoundField2.Text + @"%""");
+            DaGr2.ItemsSource = tab2;
+        }
     }
 }

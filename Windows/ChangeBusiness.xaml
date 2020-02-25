@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KursProject.Windows"
         mc:Ignorable="d"
-        Title="Добавление дела" Height="110" Width="200" ResizeMode="NoResize">
+        Title="Добавление дела" Height="110" Width="200" ResizeMode="NoResize" x:Name="TitleWindow">
     <StackPanel>
-        <TextBlock Text="Введите номер дела" Margin="2"/>
+        <TextBlock Text="Введите номер дела" Margin="2" x:Name="BusinessTextBlock"/>
         <TextBox Text="" x:Name="Business" Margin="2"/>
         <Button Content="Добавить" Click="AddButtonClick" Margin="2"/>
     </StackPanel>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KursProject"
         mc:Ignorable="d"
-        Title="Архив дел" Height="450" Width="800">
+        Title="Архив дел" Height="450" Width="800" Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
@@ -50,7 +50,7 @@
                 </Grid>
 
                 <Grid Grid.Row="1">
-                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr" SelectedCellsChanged="DaGr_SelectedCellsChanged" IsReadOnly="True"/>
+                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr" SelectedCellsChanged="DaGr_SelectedCellsChanged" IsReadOnly="True" CanUserSortColumns="False"/>
                 </Grid>
 
                 <Grid Grid.Row="2" Margin="10,0">
@@ -75,6 +75,8 @@
                     <RowDefinition Height="146"/>
                     <RowDefinition Height="32"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="24"/>
+                    <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Label Content="Обзор дела:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
@@ -103,7 +105,7 @@
                         <TextBlock Margin="52,2,0,2" Text="Причина открытия:" HorizontalAlignment="Right" Height="20"/>
                         <TextBox Margin="8,0" Text="" Height="20" Width="363" x:Name="ViewBusinessReason"/>
                     </StackPanel>
-                    <Button Height="22" Width="140" Content="Сохранить изменения" Margin="307,2,0,2" Click="ViewBusinessChangeBusiness"/>
+                    <Button Height="22" Width="140" Content="Сохранить изменения" Margin="390,2,0,2" Click="ViewBusinessChangeBusiness" HorizontalAlignment="Left"/>
                 </StackPanel>
 
                 <Grid Grid.Row="2">
@@ -111,8 +113,22 @@
                     <Label Content="выбрана запись с номером *" x:Name="Focu2" FontSize="16" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Grid Grid.Row="5">
-                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr2" SelectedCellsChanged="DaGr2_SelectedCellsChanged" IsReadOnly="True"/>
+                <Grid Grid.Row="3">
+                    <DataGrid Grid.Row="0" Margin="10,0,10,4" x:Name="DaGr2" SelectedCellsChanged="DaGr2_SelectedCellsChanged" IsReadOnly="True" CanUserSortColumns="False" />
+                </Grid>
+
+                <Grid Grid.Row="4" Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox x:Name="ListBusinessFoundField2" Width="157" Height="22" Text="" Margin="8,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="Введите номер дела для поиска"/>
+                        <Button Content="Найти" Click="ListBusinessFoundClick2" Width="105" Height="22" Margin="0,1"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="5" Margin="10,0">
+                    <Button Content="Перейти" Margin="10,8,0,10" HorizontalAlignment="Left" Width="75" Click="ListBusinessEnterClick2"/>
+                    <Button Content="Добавить" Margin="90,8,0,10" HorizontalAlignment="Left" Width="75" Click="ListBusinessAddClick2"/>
+                    <Button Content="Сброс/Обновить" Margin="170,8,0,10" HorizontalAlignment="Left" Width="106" Click="ListBusinessResetClick2"/>
+                    <Button Content="Удалить" Margin="0,8,0,10" HorizontalAlignment="Right" Width="75" Click="ListBusinessDeleteClicl2"/>
                 </Grid>
 
 
