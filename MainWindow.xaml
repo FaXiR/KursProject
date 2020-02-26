@@ -109,7 +109,7 @@
                 </StackPanel>
 
                 <Grid Grid.Row="2">
-                    <Label Content="Список документов" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="Список документов:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
                     <Label Content="выбрана запись с номером *" x:Name="Focu2" FontSize="16" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
 
@@ -135,7 +135,52 @@
             </Grid>
 
             <!-- Грид обозора декумента -->
-            <Grid x:Name="ViewDocument"  Visibility="Hidden" d:IsHidden="True"/>
+            <Grid x:Name="ViewDocument"  Visibility="Visible" IsVisibleChanged="ViewDocument_IsVisibleChanged">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="102"/>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Label Content="Обзор документа:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="" Margin="160,4,0,0" x:Name="ViewDocumentLabel"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+                        <StackPanel Width="160" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <TextBlock Margin="2" Text="Название документа:" HorizontalAlignment="Right" Height="20"/>
+                            <TextBlock Margin="2" Text="Чило страниц:" HorizontalAlignment="Right" Height="20"/>
+                            <TextBlock Margin="2" Text="Комментарий:" HorizontalAlignment="Right" Height="20"/>
+                        </StackPanel>
+                        <StackPanel Width="160" Margin="5,0,0,0">
+                            <TextBox Margin="2" Text="" Height="20" x:Name="DocumentName"/>
+                            <TextBox Margin="2" Text="" Height="20" x:Name="DocumentCount"/>
+                            <TextBox Margin="2" Text="" Height="20" x:Name="DocumentComment"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Height="22" Width="156" Content="Сохранить изменения" Margin="167,74,0,0" Click="DocumentSaveChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Label Content="Скан образы:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
+                    <Label Content="Для просмотра, нажмите два раза по скан-образу" FontSize="12" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#FF8F8F8F"/>
+                </Grid>
+                <Grid Grid.Row="3">
+                    <WrapPanel x:Name="ImageBunch">
+
+
+
+                    </WrapPanel>
+                </Grid>
+                <Grid Grid.Row="4" Margin="10,0">
+                    <Button Content="Добавить" Margin="10,8,0,0" HorizontalAlignment="Left" Width="75" Click="ImageAdd" Height="22" VerticalAlignment="Top"/>
+                    <Button Content="Сброс/Обновить" Margin="90,8,0,10" HorizontalAlignment="Left" Width="106" Click="ImageUpdateReset"/>
+                    <Button Content="Удалить" Margin="0,8,0,10" HorizontalAlignment="Right" Width="75" Click="ImageDelete"/>
+                </Grid>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
