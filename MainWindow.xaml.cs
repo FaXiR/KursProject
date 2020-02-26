@@ -326,6 +326,10 @@ namespace KursProject
                 if (ViewBusiness.IsVisible == true)
                 {
                     MessageBox.Show("Выберите дело для обзора");
+
+                    ListBusiness.Visibility = Visibility.Visible;
+                    ViewBusiness.Visibility = Visibility.Hidden;
+                    ViewDocument.Visibility = Visibility.Hidden;
                 }
                 return;
             }
@@ -348,6 +352,9 @@ namespace KursProject
             if (BusinessView == null)
             {
                 MessageBox.Show("Выберите дело для изменения");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
                 return;
             }
             string SQLResponse = "UPDATE Дело SET ";
