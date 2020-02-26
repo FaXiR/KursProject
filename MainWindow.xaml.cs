@@ -156,12 +156,16 @@ namespace KursProject
         {
             if (MessageBox.Show("Выйти из программы?", "Выход", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
             {
-                e.Cancel = true;
+                try
+                {
+                    UsAc.ConnectClose();
+                }
+                finally
+                {
+                    e.Cancel = true;
+                }
             }
-            else
-            {
-                e.Cancel = false;
-            }
+
         }
         #endregion  
 
@@ -252,6 +256,7 @@ namespace KursProject
         #endregion
 
         #region код обзора дела
+        #endregion
         private string _viewBusinessDateEnter
         {
             get
@@ -374,8 +379,6 @@ namespace KursProject
             Focu2.Content = "Выбрана запись с номером " + DaGr2.SelectedIndex;
         }
 
-        #endregion
-
         private void ListBusinessDeleteClicl2(object sender, RoutedEventArgs e)
         {
             if (DaGr2.SelectedIndex == -1)
@@ -392,7 +395,7 @@ namespace KursProject
             string DeleteRecord = tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString();
             try
             {
-                UsAc.RequestWithResponse(@"Delete FROM Документ where Документ.Номер_документа = """ + DeleteRecord + @"""");
+                UsAc.RequestWithResponse(@"Delete FROM Документ where Документ.Номер_документа = " + DeleteRecord );
                 MessageBox.Show("Запись была удалена, обновите таблицу ");
             }
             catch (Exception ex)
@@ -404,12 +407,30 @@ namespace KursProject
 
         private void ListBusinessResetClick2(object sender, RoutedEventArgs e)
         {
+            if (BusinessView == null)
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
             tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @"""");
             DaGr2.ItemsSource = tab2;
         }
 
         private void ListBusinessAddClick2(object sender, RoutedEventArgs e)
         {
+            if (BusinessView == null)
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
             if (DaGr.SelectedIndex == -1)
             {
                 MessageBox.Show("Запись не выбрана");
@@ -433,8 +454,19 @@ namespace KursProject
 
         private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
         {
+            if (BusinessView == null)
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
             tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @""" and Документ.Номер_документа Like ""%" + ListBusinessFoundField2.Text + @"%""");
             DaGr2.ItemsSource = tab2;
         }
+
+
     }
 }

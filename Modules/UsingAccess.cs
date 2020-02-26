@@ -151,6 +151,5 @@ namespace KursProject.Modules
             if (AutoOpen)
                 ConnectClose();
         }
-
     }
 }
