@@ -35,9 +35,19 @@ namespace KursProject
         /// </summary>
         string BDway = "db.mdb";
 
+        /// <summary>
+        /// Таблица для DataGrid (Список дел)
+        /// </summary>
         DataView tab;
+
+        /// <summary>
+        /// Таблица для DataGrid (Список документов)
+        /// </summary>
         DataView tab2;
 
+        /// <summary>
+        /// Задает число дел (Под списком дел)
+        /// </summary>
         string BusinessCount
         {
             set
@@ -45,22 +55,36 @@ namespace KursProject
                 BusCount.Content = "Число дел " + value;
             }
         }
-        string BusinessViewNoUse = null;
+
+        /// <summary>
+        /// Обзор дела
+        /// </summary>
         string BusinessView
         {
             set
             {
-                BusinessViewNoUse = value;
                 ViewBus.Content = value;
                 ViewBussinesLabel.Content = value;
             }
             get
             {
-                return BusinessViewNoUse;
+                return ViewBussinesLabel.Content.ToString();
             }
         }
+
+        /// <summary>
+        /// Номер документа
+        /// </summary>
         string DocNum = null;
+
+        /// <summary>
+        /// Название документа
+        /// </summary>
         string DocName = null;
+
+        /// <summary>
+        /// Если использовать set, то задает связку из номера и названия документа
+        /// </summary>
         string DocView
         {
             get
@@ -85,20 +109,12 @@ namespace KursProject
                         BDway = way;
                     }
                 }
-                catch
-                {
-
-                }
-
-                bool sucessConnection = CreateConnection(BDway);
-
-                if (!sucessConnection)
+                catch { }
+                if (!CreateConnection(BDway))
                 {
                     MessageBox.Show("Не удалось подключится к базе данных, пожалуйста, обратитесь к администратору");
                     return;
-
                 }
-
             }
 
             UsAc.AutoOpen = true;
@@ -128,30 +144,29 @@ namespace KursProject
         private void MoEnter(object sender, MouseEventArgs e)
         {
             ((Rectangle)e.OriginalSource).Fill = Brushes.AliceBlue;
-        }
+        } //При наведении курсора
         private void MoLeave(object sender, MouseEventArgs e)
         {
             ((Rectangle)e.OriginalSource).Fill = new SolidColorBrush(Color.FromRgb(229, 229, 255));
-        }
+        } //При снятии курсора
         private void BusPageShow(object sender, MouseEventArgs e)
         {
             ListBusiness.Visibility = Visibility.Visible;
             ViewBusiness.Visibility = Visibility.Hidden;
             ViewDocument.Visibility = Visibility.Hidden;
-
-        }
+        } //Кнопка включения списка дел
         private void VieBusPageShow(object sender, MouseEventArgs e)
         {
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Visible;
             ViewDocument.Visibility = Visibility.Hidden;
-        }
+        } //Кнопка включения списка документов
         private void VieDocPageShow(object sender, MouseEventArgs e)
         {
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Hidden;
             ViewDocument.Visibility = Visibility.Visible;
-        }
+        } //Кнопка включения списка фотографий
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (MessageBox.Show("Выйти из программы?", "Выход", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
@@ -166,26 +181,26 @@ namespace KursProject
                 }
             }
 
-        }
+        } //Закрытие окна
         #endregion
 
         #region код списка дел
         private void DaGr_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             Focu.Content = "Выбрана запись с номером " + DaGr.SelectedIndex;
-        }
+        } //При выборе номера записи
         private void ListBusinessResetClick(object sender, RoutedEventArgs e)
         {
             tab = UsAc.Request("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело");
             DaGr.ItemsSource = tab;
             BusinessCount = tab.Count.ToString();
-        }
+        } //Сброс записей
         private void ListBusinessFoundClick(object sender, RoutedEventArgs e)
         {
             tab = UsAc.Request(@"SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело where Дело.Номер_дела Like ""%" + ListBusinessFoundField.Text + @"%""");
             DaGr.ItemsSource = tab;
             BusinessCount = tab.Count.ToString();
-        }
+        } //Поиск записей
         private void ListBusinessDeleteClicl(object sender, RoutedEventArgs e)
         {
             if (DaGr.SelectedIndex == -1)
@@ -193,8 +208,7 @@ namespace KursProject
                 MessageBox.Show("Запись не выбрана");
                 return;
             }
-
-            if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+            else if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
             {
                 return;
             }
@@ -210,7 +224,7 @@ namespace KursProject
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
             }
-        }
+        } //Удаление записи
         private void ListBusinessEnterClick(object sender, RoutedEventArgs e)
         {
             if (DaGr.SelectedIndex == -1)
@@ -224,7 +238,30 @@ namespace KursProject
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Visible;
             ViewDocument.Visibility = Visibility.Hidden;
-        }
+
+            var timedTab = UsAc.Request(@"SELECT * FROM Дело where Дело.Номер_дела = """ + BusinessView + @"""");
+
+            if (timedTab.Count == 0)
+            {
+                MessageBox.Show("Дело недоступно, выберете друге дело");
+                BusinessView = " ";
+
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
+            _viewBusinessDateEnter = timedTab.Table.Rows[0]["Дата_введения_на_хранение"].ToString();
+            _viewBusinessDateOpen = timedTab.Table.Rows[0]["Дата_открытия"].ToString();
+            _viewBusinessDatelose = timedTab.Table.Rows[0]["Дата_закрытия"].ToString();
+            _viewBusinessWitness = timedTab.Table.Rows[0]["Заверитель"].ToString();
+            _viewBusinessComments = timedTab.Table.Rows[0]["Комментарии"].ToString();
+            _viewBusinessReason = timedTab.Table.Rows[0]["Причина_открытия"].ToString();
+
+            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @"""");
+            DaGr2.ItemsSource = tab2;
+        } //Переход по записи
         private void ListBusinessAddClick(object sender, RoutedEventArgs e)
         {
             Windows.ChangeBusiness changeBusiness = new Windows.ChangeBusiness();
@@ -252,7 +289,30 @@ namespace KursProject
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Visible;
             ViewDocument.Visibility = Visibility.Hidden;
-        }
+        } //Добавление записи
+        private void ViewBusinessChangeBusiness(object sender, RoutedEventArgs e)
+        {
+            if (BusinessView == null)
+            {
+                MessageBox.Show("Выберите дело для изменения");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+            string SQLResponse = "UPDATE Дело SET ";
+
+            SQLResponse += @"Дата_введения_на_хранение = """ + _viewBusinessDateEnter + @""", ";
+            SQLResponse += @"Дата_открытия = """ + _viewBusinessDateOpen + @""", ";
+            SQLResponse += @"Дата_закрытия = """ + _viewBusinessDatelose + @""", ";
+            SQLResponse += @"Заверитель = """ + _viewBusinessWitness + @""", ";
+            SQLResponse += @"Комментарии = """ + _viewBusinessComments + @""", ";
+            SQLResponse += @"Причина_открытия = """ + _viewBusinessReason + @""" ";
+            SQLResponse += @"where Дело.Номер_дела = """ + BusinessView + @"""";
+
+            UsAc.RequestWithResponse(SQLResponse);
+        } //Код изменения содержимого дела
+
         #endregion
 
         #region код обзора дела        
@@ -323,71 +383,10 @@ namespace KursProject
             }
         }
 
-        private void ViewBusiness_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (BusinessView == null)
-            {
-                if (ViewBusiness.IsVisible == true)
-                {
-                    MessageBox.Show("Выберите дело для обзора");
-
-                    ListBusiness.Visibility = Visibility.Visible;
-                    ViewBusiness.Visibility = Visibility.Hidden;
-                    ViewDocument.Visibility = Visibility.Hidden;
-                }
-                return;
-            }
-
-            var timedTab = UsAc.Request(@"SELECT * FROM Дело where Дело.Номер_дела = """ + BusinessView + @"""");
-
-            if (timedTab.Count == 0)
-            {
-                MessageBox.Show("Дело было удалено, выберете друге дело");
-                BusinessView = " ";
-
-                ListBusiness.Visibility = Visibility.Visible;
-                ViewBusiness.Visibility = Visibility.Hidden;
-                ViewDocument.Visibility = Visibility.Hidden;
-                return;
-            }
-
-            _viewBusinessDateEnter = timedTab.Table.Rows[0]["Дата_введения_на_хранение"].ToString();
-            _viewBusinessDateOpen = timedTab.Table.Rows[0]["Дата_открытия"].ToString();
-            _viewBusinessDatelose = timedTab.Table.Rows[0]["Дата_закрытия"].ToString();
-            _viewBusinessWitness = timedTab.Table.Rows[0]["Заверитель"].ToString();
-            _viewBusinessComments = timedTab.Table.Rows[0]["Комментарии"].ToString();
-            _viewBusinessReason = timedTab.Table.Rows[0]["Причина_открытия"].ToString();
-
-            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @"""");
-            DaGr2.ItemsSource = tab2;
-        }
-
-        private void ViewBusinessChangeBusiness(object sender, RoutedEventArgs e)
-        {
-            if (BusinessView == null)
-            {
-                MessageBox.Show("Выберите дело для изменения");
-                ListBusiness.Visibility = Visibility.Visible;
-                ViewBusiness.Visibility = Visibility.Hidden;
-                ViewDocument.Visibility = Visibility.Hidden;
-                return;
-            }
-            string SQLResponse = "UPDATE Дело SET ";
-
-            SQLResponse += @"Дата_введения_на_хранение = """ + _viewBusinessDateEnter + @""", ";
-            SQLResponse += @"Дата_открытия = """ + _viewBusinessDateOpen + @""", ";
-            SQLResponse += @"Дата_закрытия = """ + _viewBusinessDatelose + @""", ";
-            SQLResponse += @"Заверитель = """ + _viewBusinessWitness + @""", ";
-            SQLResponse += @"Комментарии = """ + _viewBusinessComments + @""", ";
-            SQLResponse += @"Причина_открытия = """ + _viewBusinessReason + @""" ";
-            SQLResponse += @"where Дело.Номер_дела = """ + BusinessView + @"""";
-
-            UsAc.RequestWithResponse(SQLResponse);
-        }
         private void DaGr2_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             Focu2.Content = "Выбрана запись с номером " + DaGr2.SelectedIndex;
-        }
+        } //При выборе номера записи
         private void ListBusinessDeleteClicl2(object sender, RoutedEventArgs e)
         {
             if (DaGr2.SelectedIndex == -1)
@@ -395,8 +394,7 @@ namespace KursProject
                 MessageBox.Show("Запись не выбрана");
                 return;
             }
-
-            if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
+            else if (MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No)
             {
                 return;
             }
@@ -412,7 +410,7 @@ namespace KursProject
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
             }
-        }
+        } //Удаление записи
         private void ListBusinessResetClick2(object sender, RoutedEventArgs e)
         {
             if (BusinessView == null)
@@ -426,7 +424,7 @@ namespace KursProject
 
             tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @"""");
             DaGr2.ItemsSource = tab2;
-        }
+        } //Сброс записей
         private void ListBusinessAddClick2(object sender, RoutedEventArgs e)
         {
             if (BusinessView == null)
@@ -456,7 +454,7 @@ namespace KursProject
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Hidden;
             ViewDocument.Visibility = Visibility.Visible;
-        }
+        } //Добавление записи
         private void ListBusinessEnterClick2(object sender, RoutedEventArgs e)
         {
             if (BusinessView == null)
@@ -478,10 +476,37 @@ namespace KursProject
             DocName = tab2.Table.Rows[DaGr2.SelectedIndex]["Название_документа"].ToString();
             DocView = ""; //нужная запись задастся сама
 
+            ViewDocumentLabel.Content = BusinessView + " - " + DocView;
+
             ListBusiness.Visibility = Visibility.Hidden;
             ViewBusiness.Visibility = Visibility.Hidden;
             ViewDocument.Visibility = Visibility.Visible;
-        }
+
+            var timedTab = UsAc.Request(@"SELECT * FROM Документ where Документ.Номер_документа = " + DocNum);
+
+            if (timedTab.Count == 0)
+            {
+                MessageBox.Show("Документ недоступен, выберете другой документ");
+                BusinessView = " ";
+
+                ListBusiness.Visibility = Visibility.Hidden;
+                ViewBusiness.Visibility = Visibility.Visible;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
+            _DocumentName = timedTab.Table.Rows[0]["Название_документа"].ToString();
+            _DocumentCount = timedTab.Table.Rows[0]["Число_страниц"].ToString();
+            _DocumentComment = timedTab.Table.Rows[0]["Комментарии"].ToString();
+
+            timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
+
+            for (int i = 0; i < timedTab.Count; i++)
+            {
+                //ImageBunch
+                MessageBox.Show(timedTab.Table.Rows[0]["Путь_к_скан_образу"].ToString());
+            }
+        } //Переход по записи
         private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
         {
             if (BusinessView == null)
@@ -493,10 +518,10 @@ namespace KursProject
                 return;
             }
 
-            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @""" and Документ.Номер_документа Like ""%" + ListBusinessFoundField2.Text + @"%""");
+            tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @""" and Документ.Номер_документа = " + ListBusinessFoundField2.Text + "");
             DaGr2.ItemsSource = tab2;
-        }
-        #endregion
+        } //Поиск записей
+        #endregion 
 
         #region код обзора документа
         #endregion
@@ -512,7 +537,6 @@ namespace KursProject
                 DocumentName.Text = value;
             }
         }
-
         private string _DocumentCount
         {
             get
@@ -524,7 +548,6 @@ namespace KursProject
                 DocumentCount.Text = value;
             }
         }
-
         private string _DocumentComment
         {
             get
@@ -553,43 +576,32 @@ namespace KursProject
 
         }
 
-        private void ViewDocument_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void DocumentSaveChanges(object sender, RoutedEventArgs e) //Код изменения содержимого
         {
             if (BusinessView == null)
             {
+                MessageBox.Show("Выберите дело для изменения");
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
                 return;
             }
-            return;
-
-            var timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = """ + DocNum + @"""");
-
-            if (timedTab.Count == 0)
+            if (DocView == " - ")
             {
-                MessageBox.Show("Документ был удален, выберете другой документ");
-                BusinessView = " ";
-
+                MessageBox.Show("Выберите документ для изменения");
                 ListBusiness.Visibility = Visibility.Hidden;
                 ViewBusiness.Visibility = Visibility.Visible;
                 ViewDocument.Visibility = Visibility.Hidden;
                 return;
             }
 
-            _viewBusinessDateEnter = timedTab.Table.Rows[0]["Дата_введения_на_хранение"].ToString();
-            _viewBusinessDateOpen = timedTab.Table.Rows[0]["Дата_открытия"].ToString();
-            _viewBusinessDatelose = timedTab.Table.Rows[0]["Дата_закрытия"].ToString();
-            _viewBusinessWitness = timedTab.Table.Rows[0]["Заверитель"].ToString();
-            _viewBusinessComments = timedTab.Table.Rows[0]["Комментарии"].ToString();
-            _viewBusinessReason = timedTab.Table.Rows[0]["Причина_открытия"].ToString();
+            string SQLResponse = "UPDATE Содержимое_документа SET ";
 
-            for (int i = 0; i <timedTab.Count; i++)
-            {
-               //ImageBunch
-            }
-        }
-
-        private void DocumentSaveChanges(object sender, RoutedEventArgs e)
-        {
-
+            SQLResponse += @"Название_документа = """ + _DocumentName + @""", ";
+            SQLResponse += @"Число_страниц = """ + _DocumentCount + @""", ";
+            SQLResponse += @"Комментарии = """ + _DocumentComment + @""", ";
+            SQLResponse += @"where Содержимое_документа.Номер_документа = " + DocNum + @"";
+            UsAc.RequestWithResponse(SQLResponse);
         }
     }
 }
