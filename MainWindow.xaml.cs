@@ -341,6 +341,17 @@ namespace KursProject
 
             var timedTab = UsAc.Request(@"SELECT * FROM Дело where Дело.Номер_дела = """ + BusinessView + @"""");
 
+            if (timedTab.Count == 0)
+            {
+                MessageBox.Show("Дело было удалено, выберете друге дело");
+                BusinessView = " ";
+
+                ListBusiness.Visibility = Visibility.Visible;
+                ViewBusiness.Visibility = Visibility.Hidden;
+                ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
             _viewBusinessDateEnter = timedTab.Table.Rows[0]["Дата_введения_на_хранение"].ToString();
             _viewBusinessDateOpen = timedTab.Table.Rows[0]["Дата_открытия"].ToString();
             _viewBusinessDatelose = timedTab.Table.Rows[0]["Дата_закрытия"].ToString();
@@ -395,7 +406,7 @@ namespace KursProject
             string DeleteRecord = tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString();
             try
             {
-                UsAc.RequestWithResponse(@"Delete FROM Документ where Документ.Номер_документа = " + DeleteRecord );
+                UsAc.RequestWithResponse(@"Delete FROM Документ where Документ.Номер_документа = " + DeleteRecord);
                 MessageBox.Show("Запись была удалена, обновите таблицу ");
             }
             catch (Exception ex)
@@ -449,7 +460,19 @@ namespace KursProject
 
         private void ListBusinessEnterClick2(object sender, RoutedEventArgs e)
         {
+            if (DaGr2.SelectedIndex == -1)
+            {
+                MessageBox.Show("Запись не выбрана");
+                return;
+            }
 
+            //TODO: Пилитб
+
+            BusinessView = tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_дела"].ToString();
+
+            ListBusiness.Visibility = Visibility.Hidden;
+            ViewBusiness.Visibility = Visibility.Hidden;
+            ViewDocument.Visibility = Visibility.Visible;
         }
 
         private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
@@ -466,7 +489,5 @@ namespace KursProject
             tab2 = UsAc.Request(@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = """ + BusinessView + @""" and Документ.Номер_документа Like ""%" + ListBusinessFoundField2.Text + @"%""");
             DaGr2.ItemsSource = tab2;
         }
-
-
     }
 }
