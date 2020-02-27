@@ -113,6 +113,7 @@ namespace KursProject
                 if (!CreateConnection(BDway))
                 {
                     MessageBox.Show("Не удалось подключится к базе данных, пожалуйста, обратитесь к администратору");
+                    this.Close();
                     return;
                 }
             }
@@ -169,6 +170,11 @@ namespace KursProject
         } //Кнопка включения списка фотографий
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (UsAc == null)
+            {
+                return;
+            }
+
             if (MessageBox.Show("Выйти из программы?", "Выход", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
             {
                 try
@@ -312,7 +318,6 @@ namespace KursProject
 
             UsAc.RequestWithResponse(SQLResponse);
         } //Код изменения содержимого дела
-
         #endregion
 
         #region код обзора дела        
@@ -524,8 +529,6 @@ namespace KursProject
         #endregion 
 
         #region код обзора документа
-        #endregion
-
         private string _DocumentName
         {
             get
@@ -564,19 +567,16 @@ namespace KursProject
         private void ImageDelete(object sender, RoutedEventArgs e)
         {
 
-        }
-
+        } //Удаление изображения
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
 
-        }
-
+        } //Сброс изображений
         private void ImageAdd(object sender, RoutedEventArgs e)
         {
 
-        }
-
-        private void DocumentSaveChanges(object sender, RoutedEventArgs e) //Код изменения содержимого
+        } //Добавление скан образа
+        private void DocumentSaveChanges(object sender, RoutedEventArgs e)
         {
             if (BusinessView == null)
             {
@@ -586,7 +586,7 @@ namespace KursProject
                 ViewDocument.Visibility = Visibility.Hidden;
                 return;
             }
-            if (DocView == " - ")
+            if (DocView == " - " || DocView == null || DocView == "")
             {
                 MessageBox.Show("Выберите документ для изменения");
                 ListBusiness.Visibility = Visibility.Hidden;
@@ -595,13 +595,15 @@ namespace KursProject
                 return;
             }
 
-            string SQLResponse = "UPDATE Содержимое_документа SET ";
+            string SQLResponse = "UPDATE Документ SET ";
 
             SQLResponse += @"Название_документа = """ + _DocumentName + @""", ";
-            SQLResponse += @"Число_страниц = """ + _DocumentCount + @""", ";
-            SQLResponse += @"Комментарии = """ + _DocumentComment + @""", ";
-            SQLResponse += @"where Содержимое_документа.Номер_документа = " + DocNum + @"";
+            SQLResponse += @"Число_страниц = " + _DocumentCount + ", ";
+            SQLResponse += @"Комментарии = """ + _DocumentComment + @""" ";
+            SQLResponse += @"where Документ.Номер_документа = " + DocNum + @"";
             UsAc.RequestWithResponse(SQLResponse);
-        }
+        } //Код изменения содержимого
+        #endregion
+
     }
 }
