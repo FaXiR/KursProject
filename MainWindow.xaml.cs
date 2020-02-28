@@ -36,6 +36,11 @@ namespace KursProject
         string BDway = "db.mdb";
 
         /// <summary>
+        /// Расположение папки со скан образами
+        /// </summary>
+        string PreImageWay = "image/";
+
+        /// <summary>
         /// Таблица для DataGrid (Список дел)
         /// </summary>
         DataView tab;
@@ -103,7 +108,7 @@ namespace KursProject
             {
                 try
                 {
-                    string way = File.ReadAllLines("db.txt")[0];
+                    string way = File.ReadAllLines("db.txt", Encoding.GetEncoding(1251))[0];
                     if (way != "")
                     {
                         BDway = way;
@@ -123,6 +128,23 @@ namespace KursProject
             tab = UsAc.Request("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело");
             DaGr.ItemsSource = tab;
             BusinessCount = tab.Count.ToString();
+
+            //Поиск пути
+            if (BDway.LastIndexOf('\\') == -1)
+            {
+                if (BDway.LastIndexOf('/') == -1)
+                {
+
+                }
+                else
+                {
+                    PreImageWay = BDway.Substring(0, BDway.LastIndexOf('/')) + "/image/";
+                }
+            }
+            else
+            {
+                PreImageWay = BDway.Substring(0, BDway.LastIndexOf('\\')) + "\\image\\";
+            }
         }
 
         /// <summary>
@@ -506,11 +528,28 @@ namespace KursProject
 
             timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
 
+            ImageBunch.Children.Clear();
+
             for (int i = 0; i < timedTab.Count; i++)
             {
-                //ImageBunch
-                MessageBox.Show(timedTab.Table.Rows[0]["Путь_к_скан_образу"].ToString());
+                try
+                {
+                    Image image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri(PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString())),
+                        Height = 297,
+                        Width = 210,
+                        Margin = new Thickness(10)
+                        //    Name = (PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString()).Replace('/')
+                    };
+                    ImageBunch.Children.Add(image);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                }
             }
+
         } //Переход по записи
         private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
         {
@@ -520,6 +559,12 @@ namespace KursProject
                 ListBusiness.Visibility = Visibility.Visible;
                 ViewBusiness.Visibility = Visibility.Hidden;
                 ViewDocument.Visibility = Visibility.Hidden;
+                return;
+            }
+
+            if (!int.TryParse(ListBusinessFoundField2.Text, out int num))
+            {
+                MessageBox.Show("Пожалуйста, используйте для поиска документа только цифры");
                 return;
             }
 
@@ -570,7 +615,29 @@ namespace KursProject
         } //Удаление изображения
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
+            DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
 
+            ImageBunch.Children.Clear();
+
+            for (int i = 0; i < timedTab.Count; i++)
+            {
+                try
+                {
+                    Image image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri(PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString())),
+                        Height = 297,
+                        Width = 210,
+                        Margin = new Thickness(10)
+                        //    Name = (PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString()).Replace('/')
+                    };
+                    ImageBunch.Children.Add(image);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                }
+            }
         } //Сброс изображений
         private void ImageAdd(object sender, RoutedEventArgs e)
         {
@@ -602,8 +669,11 @@ namespace KursProject
             SQLResponse += @"Комментарии = """ + _DocumentComment + @""" ";
             SQLResponse += @"where Документ.Номер_документа = " + DocNum + @"";
             UsAc.RequestWithResponse(SQLResponse);
+
+            DocName = _DocumentName;
+            DocView = "";
+
         } //Код изменения содержимого
         #endregion
-
     }
 }
