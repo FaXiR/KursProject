@@ -131,21 +131,19 @@ namespace KursProject
             BusinessCount = tab.Count.ToString();
 
             //Поиск пути
-            if (BDway.LastIndexOf('\\') == -1)
+            if ((BDway.LastIndexOf('\\') == -1) == (BDway.LastIndexOf('/') == -1))
             {
-                if (BDway.LastIndexOf('/') == -1)
-                {
-
-                }
-                else
-                {
-                    PreImageWay = BDway.Substring(0, BDway.LastIndexOf('/')) + "/image/";
-                }
+                //Ничего
             }
-            else
+            else if (BDway.LastIndexOf('\\') > BDway.LastIndexOf('/'))
             {
                 PreImageWay = BDway.Substring(0, BDway.LastIndexOf('\\')) + "\\image\\";
             }
+            else if (BDway.LastIndexOf('\\') < BDway.LastIndexOf('/'))
+            {
+                PreImageWay = BDway.Substring(0, BDway.LastIndexOf('/')) + "/image/";
+            }
+
         }
 
         /// <summary>
@@ -643,6 +641,7 @@ namespace KursProject
         } //Сброс изображений
         private void ImageAdd(object sender, RoutedEventArgs e)
         {
+            //Получение пути до файла
             OpenFileDialog dialog = new OpenFileDialog
             {
                 Filter = "Все файлы|*.*|JPEG (*.jpg; *.jpeg; *.jpe; *.ifif)|*.jpg; *.jpeg; *.jpe; *.ifif|PNG (*.png)|*.png",
@@ -655,8 +654,34 @@ namespace KursProject
             }
 
             string filename = dialog.FileName;
-            MessageBox.Show(filename);
+            // MessageBox.Show(filename);
             NowFilterIndex = dialog.FilterIndex;
+
+            //Получение списка файлов с типом данных с полным путем
+            var AllImage = Directory.GetFiles(PreImageWay);
+
+            //Получение списка файлов только с именем фала (без пути и типа данных)
+            for (int i = 0; i < AllImage.Length; i++)
+            {
+                //AllImage[i] + 
+                //MessageBox.Show(AllImage[i]);
+                //AllImage[i] = AllImage[i].Substring(AllImage[i].LastIndexOf('/')+1);
+                //MessageBox.Show(AllImage[i]);
+                //AllImage[i] = AllImage[i].Substring(AllImage[i].IndexOf('.')+1, 3);
+                // MessageBox.Show(AllImage[i]);
+            }
+
+
+
+
+            var dir = new DirectoryInfo(PreImageWay); // папка с файлами 
+            var files = new List<string>(); // список для имен файлов 
+            foreach (FileInfo file in dir.GetFiles()) // извлекаем все файлы и кидаем их в список 
+            {
+                MessageBox.Show(Path.GetFileNameWithoutExtension(file.Name)); // получаем полный путь к файлу и потом вычищаем ненужное, оставляем только имя файла. 
+            }
+
+  
 
         } //Добавление скан образа
         private void DocumentSaveChanges(object sender, RoutedEventArgs e)
@@ -690,6 +715,7 @@ namespace KursProject
             DocView = "";
 
         } //Код изменения содержимого
+
         #endregion
     }
 }
