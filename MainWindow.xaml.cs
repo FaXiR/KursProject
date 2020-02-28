@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using KursProject.Modules;
+using Microsoft.Win32;
 
 namespace KursProject
 {
@@ -608,6 +609,7 @@ namespace KursProject
                 DocumentComment.Text = value;
             }
         }
+        private int NowFilterIndex = 1;
 
         private void ImageDelete(object sender, RoutedEventArgs e)
         {
@@ -641,6 +643,20 @@ namespace KursProject
         } //Сброс изображений
         private void ImageAdd(object sender, RoutedEventArgs e)
         {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Filter = "Все файлы|*.*|JPEG (*.jpg; *.jpeg; *.jpe; *.ifif)|*.jpg; *.jpeg; *.jpe; *.ifif|PNG (*.png)|*.png",
+                FilterIndex = NowFilterIndex
+            };
+
+            if (dialog.ShowDialog() == false)
+            {
+                return;
+            }
+
+            string filename = dialog.FileName;
+            MessageBox.Show(filename);
+            NowFilterIndex = dialog.FilterIndex;
 
         } //Добавление скан образа
         private void DocumentSaveChanges(object sender, RoutedEventArgs e)
