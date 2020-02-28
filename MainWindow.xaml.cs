@@ -39,7 +39,7 @@ namespace KursProject
         /// <summary>
         /// Расположение папки со скан образами
         /// </summary>
-        string PreImageWay = "image/";
+        string PreImageWay;
 
         /// <summary>
         /// Таблица для DataGrid (Список дел)
@@ -133,7 +133,7 @@ namespace KursProject
             //Поиск пути
             if ((BDway.LastIndexOf('\\') == -1) == (BDway.LastIndexOf('/') == -1))
             {
-                //Ничего
+                PreImageWay = Environment.CurrentDirectory + "/image/";
             }
             else if (BDway.LastIndexOf('\\') > BDway.LastIndexOf('/'))
             {
@@ -531,21 +531,43 @@ namespace KursProject
 
             for (int i = 0; i < timedTab.Count; i++)
             {
+                bool add = true;
+                Image image = null;
+
                 try
                 {
-                    Image image = new Image()
+                    image = new Image()
                     {
                         Source = new BitmapImage(new Uri(PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString())),
-                        Height = 297,
-                        Width = 210,
                         Margin = new Thickness(10)
-                        //    Name = (PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString()).Replace('/')
                     };
-                    ImageBunch.Children.Add(image);
+
+                }
+                catch (NotSupportedException)
+                {
+                    image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri("Source/FileNotImage.jpg", UriKind.Relative)),
+                        Margin = new Thickness(10)
+                    };
+                }
+                catch (FileNotFoundException)
+                {
+                    image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri("Source/FileNotFound.jpg", UriKind.Relative)),
+                        Margin = new Thickness(10)
+                    };
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                    add = false;
+                }
+
+                if (add)
+                {
+                    ImageBunch.Children.Add(image);
                 }
             }
 
@@ -615,27 +637,52 @@ namespace KursProject
         } //Удаление изображения
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
+            // TODO Name = timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString().Substring(0, timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString().IndexOf('.'))
+
+
             DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
 
             ImageBunch.Children.Clear();
 
             for (int i = 0; i < timedTab.Count; i++)
             {
+                bool add = true;
+                Image image = null;
+
                 try
                 {
-                    Image image = new Image()
+                    image = new Image()
                     {
                         Source = new BitmapImage(new Uri(PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString())),
-                        Height = 297,
-                        Width = 210,
                         Margin = new Thickness(10)
-                        //    Name = (PreImageWay + timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString()).Replace('/')
                     };
-                    ImageBunch.Children.Add(image);
+
+                }
+                catch (NotSupportedException)
+                {
+                    image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri("Source/FileNotImage.jpg", UriKind.Relative)),
+                        Margin = new Thickness(10)
+                    };
+                }
+                catch (FileNotFoundException)
+                {
+                    image = new Image()
+                    {
+                        Source = new BitmapImage(new Uri("Source/FileNotFound.jpg", UriKind.Relative)),
+                        Margin = new Thickness(10)
+                    };
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                    add = false;
+                }
+
+                if (add)
+                {
+                    ImageBunch.Children.Add(image);
                 }
             }
         } //Сброс изображений
@@ -653,35 +700,42 @@ namespace KursProject
                 return;
             }
 
-            string filename = dialog.FileName;
-            // MessageBox.Show(filename);
+            string fileName = dialog.FileName;
+            string fileFormat = dialog.FileName.Substring(fileName.IndexOf('.'));
             NowFilterIndex = dialog.FilterIndex;
 
             //Получение списка файлов с типом данных с полным путем
-            var AllImage = Directory.GetFiles(PreImageWay);
+            string[] AllImage = Directory.GetFiles(PreImageWay);
+
+            long NewFileName = 0;
 
             //Получение списка файлов только с именем фала (без пути и типа данных)
             for (int i = 0; i < AllImage.Length; i++)
             {
-                //AllImage[i] + 
-                //MessageBox.Show(AllImage[i]);
-                //AllImage[i] = AllImage[i].Substring(AllImage[i].LastIndexOf('/')+1);
-                //MessageBox.Show(AllImage[i]);
-                //AllImage[i] = AllImage[i].Substring(AllImage[i].IndexOf('.')+1, 3);
-                // MessageBox.Show(AllImage[i]);
+                AllImage[i] = AllImage[i].Substring(AllImage[i].LastIndexOf('/') + 1);
+                AllImage[i] = AllImage[i].Substring(0, AllImage[i].IndexOf('.'));
+
+                try
+                {
+                    long TimedName = Convert.ToInt64(AllImage[i]);
+                    if (TimedName > NewFileName)
+                    {
+                        NewFileName = TimedName;
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
             }
+            NewFileName++;
+            MessageBox.Show(NewFileName.ToString());
 
+            //Копирование в папку image
+            File.Copy(fileName, PreImageWay + NewFileName.ToString() + fileFormat);
 
-
-
-            var dir = new DirectoryInfo(PreImageWay); // папка с файлами 
-            var files = new List<string>(); // список для имен файлов 
-            foreach (FileInfo file in dir.GetFiles()) // извлекаем все файлы и кидаем их в список 
-            {
-                MessageBox.Show(Path.GetFileNameWithoutExtension(file.Name)); // получаем полный путь к файлу и потом вычищаем ненужное, оставляем только имя файла. 
-            }
-
-  
+            //Добавление записи к БД
+            UsAc.RequestWithResponse($@"INSERT INTO Содержимое_документа (Номер_документа, Путь_к_скан_образу) Values ({DocNum}, ""{NewFileName + fileFormat}"")");
 
         } //Добавление скан образа
         private void DocumentSaveChanges(object sender, RoutedEventArgs e)
@@ -715,7 +769,6 @@ namespace KursProject
             DocView = "";
 
         } //Код изменения содержимого
-
         #endregion
     }
 }

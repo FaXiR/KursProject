@@ -169,7 +169,7 @@
                     <Label Content="Для просмотра, нажмите два раза по скан-образу" FontSize="12" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#FF8F8F8F"/>
                 </Grid>
                 <Grid Grid.Row="3">
-                    <WrapPanel x:Name="ImageBunch">
+                    <WrapPanel x:Name="ImageBunch" ItemHeight="279" ItemWidth="210">
 
 
 

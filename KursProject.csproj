@@ -105,6 +105,9 @@
   <ItemGroup>
     <Resource Include="Source\RosReestr.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Source\FileNotFound.jpg" />
+    <Resource Include="Source\FileNotImage.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
