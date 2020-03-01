@@ -48,7 +48,7 @@ namespace KursProject
             }
             UsAc.AutoOpen = true;
 
-            Update("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело", tab, DaGr);
+            Update("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело", ref tab, ref DaGr);
             BusinessCount = tab.Count.ToString();
 
             WayFound();
@@ -101,13 +101,13 @@ namespace KursProject
         } //При выборе номера записи
         private void ListBusinessResetClick(object sender, RoutedEventArgs e)
         {
-            Update("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело", tab, DaGr);
+            Update("SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело", ref tab, ref DaGr);
             BusinessCount = tab.Count.ToString();
 
         } //Сброс записей
         private void ListBusinessFoundClick(object sender, RoutedEventArgs e)
         {
-            Update($@"SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело where Дело.Номер_дела Like ""% {ListBusinessFoundField.Text} %""", tab, DaGr);
+            Update($@"SELECT Номер_дела, Дата_введения_на_хранение, Причина_открытия FROM Дело where Дело.Номер_дела Like ""%{ListBusinessFoundField.Text}%""", ref tab, ref DaGr);
             BusinessCount = tab.Count.ToString();
         } //Поиск записей
         private void ListBusinessDeleteClicl(object sender, RoutedEventArgs e)
@@ -132,6 +132,18 @@ namespace KursProject
             {
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
+            }
+
+            if (DeleteRecord == BusinessView)
+            {
+                BusinessView =
+                _viewBusinessDateEnter =
+                _viewBusinessDateOpen =
+                _viewBusinessDatelose =
+                _viewBusinessWitness =
+                _viewBusinessComments =
+                _viewBusinessReason = "";
+                DaGr2.ItemsSource = "";
             }
         } //Удаление записи
         private void ListBusinessEnterClick(object sender, RoutedEventArgs e)
@@ -158,7 +170,7 @@ namespace KursProject
             }
 
             TableRowsToFieldViewBusiness(timedTab);
-            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView}""", tab2, DaGr2);
+            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView}""", ref tab2, ref DaGr2);
         } //Переход по записи
         private void ListBusinessAddClick(object sender, RoutedEventArgs e)
         {
@@ -181,9 +193,14 @@ namespace KursProject
                 return;
             }
 
-            UsAc.RequestWithResponse(@"INSERT INTO Дело (Номер_дела) Values (""" + TimeBusiness + @""")");
             BusinessView = TimeBusiness;
 
+            UsAc.RequestWithResponse(@"INSERT INTO Дело (Номер_дела) Values (""" + TimeBusiness + @""")");
+            DataView timedTab = UsAc.Request($@"SELECT * FROM Дело where Дело.Номер_дела = ""{TimeBusiness}""");
+
+            TableRowsToFieldViewBusiness(timedTab);
+
+            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{TimeBusiness}""", ref tab2, ref DaGr2);
             ViewBusinessShow();
         } //Добавление записи
         #endregion
@@ -191,7 +208,7 @@ namespace KursProject
         #region код обзора дела   
         private void ViewBusinessChangeBusiness(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Выберите дело для изменения");
                 ListBusinessShow();
@@ -205,6 +222,12 @@ namespace KursProject
         } //При выборе номера записи
         private void ListBusinessDeleteClicl2(object sender, RoutedEventArgs e)
         {
+            if (BusinessView == "")
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusinessShow();
+                return;
+            }
             if (DaGr2.SelectedIndex == -1)
             {
                 MessageBox.Show("Запись не выбрана");
@@ -226,29 +249,32 @@ namespace KursProject
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
             }
+            if (DocNum == DeleteRecord)
+            {
+                _DocumentName =
+                _DocumentCount =
+                _DocumentComment = "";
+                DocSet("", "");
+
+                ImageBunch.Children.Clear();
+            }
         } //Удаление записи
         private void ListBusinessResetClick2(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Дело не выбрано");
                 ListBusinessShow();
                 return;
             }
-            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView }""", tab2, DaGr2);
+            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView }""", ref tab2, ref DaGr2);
         } //Сброс записей
         private void ListBusinessAddClick2(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Дело не выбрано");
                 ListBusinessShow();
-                return;
-            }
-
-            if (DaGr.SelectedIndex == -1)
-            {
-                MessageBox.Show("Запись не выбрана");
                 return;
             }
 
@@ -259,11 +285,15 @@ namespace KursProject
 
             DocSet(NewBusinessNum.ToString(), "*название документа*");
 
+            ViewDocumentLabel.Content = BusinessView + " - " + DocView;
+
+            ImageBunch.Children.Clear();
+
             ViewDocumentShow();
         } //Добавление записи
         private void ListBusinessEnterClick2(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Дело не выбрано");
                 ListBusinessShow();
@@ -279,8 +309,6 @@ namespace KursProject
             DocSet(tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString(), tab2.Table.Rows[DaGr2.SelectedIndex]["Название_документа"].ToString());
 
             ViewDocumentLabel.Content = BusinessView + " - " + DocView;
-
-            ViewDocumentShow();
 
             var timedTab = UsAc.Request($"SELECT * FROM Документ where Документ.Номер_документа = {DocNum}");
 
@@ -304,13 +332,19 @@ namespace KursProject
                 ImageAdd(timedTab, i);
             }
 
+            ViewDocumentShow();
         } //Переход по записи
         private void ListBusinessFoundClick2(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Дело не выбрано");
                 ListBusinessShow();
+                return;
+            }
+
+            if (ListBusinessFoundField2.Text == "")
+            {
                 return;
             }
 
@@ -320,7 +354,7 @@ namespace KursProject
                 return;
             }
 
-            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView }"" and Документ.Номер_документа = {ListBusinessFoundField2.Text}", tab2, DaGr2);
+            Update($@"SELECT Номер_документа, Название_документа, Число_страниц FROM Документ where Документ.Номер_дела = ""{BusinessView }"" and Документ.Номер_документа = {ListBusinessFoundField2.Text}", ref tab2, ref DaGr2);
         } //Поиск записей
         #endregion
 
@@ -331,7 +365,18 @@ namespace KursProject
         } //Удаление изображения
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
-            // TODO Name = timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString().Substring(0, timedTab.Table.Rows[i]["Путь_к_скан_образу"].ToString().IndexOf('.'))
+            if (BusinessView == "")
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusinessShow();
+                return;
+            }
+            if (DocNum == "")
+            {
+                MessageBox.Show("Документ не выбран");
+                ViewBusinessShow();
+                return;
+            }
             DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
 
             ImageBunch.Children.Clear();
@@ -343,17 +388,30 @@ namespace KursProject
         } //Сброс изображений
         private void ImageAdd(object sender, RoutedEventArgs e)
         {
+            if (BusinessView == "")
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusinessShow();
+                return;
+            }
+            if (DocNum == "")
+            {
+                MessageBox.Show("Документ не выбран");
+                ViewBusinessShow();
+                return;
+            }
+
             AddImageToBD();
         } //Добавление скан образа
         private void DocumentSaveChanges(object sender, RoutedEventArgs e)
         {
-            if (BusinessView == null)
+            if (BusinessView == "")
             {
                 MessageBox.Show("Выберите дело для изменения");
                 ListBusinessShow();
                 return;
             }
-            if (DocView == " - " || DocView == null || DocView == "")
+            if (DocNum == "")
             {
                 MessageBox.Show("Выберите документ для изменения");
                 ViewBusinessShow();
@@ -611,7 +669,7 @@ namespace KursProject
             }
         }
 
-        private void Update(string SQL, DataView DV, DataGrid DG)
+        private void Update(string SQL, ref DataView DV, ref DataGrid DG)
         {
             DV = UsAc.Request(SQL);
             DG.ItemsSource = DV;
