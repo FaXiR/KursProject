@@ -135,7 +135,7 @@
             </Grid>
 
             <!-- Грид обозора декумента -->
-            <Grid x:Name="ViewDocument" Visibility="Hidden">
+            <Grid x:Name="ViewDocument" Visibility="Visible">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"/>
                     <RowDefinition Height="102"/>
@@ -161,12 +161,15 @@
                         </StackPanel>
                     </StackPanel>
                     <Button Height="22" Width="156" Content="Сохранить изменения" Margin="167,74,0,0" Click="DocumentSaveChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-
                 </Grid>
 
                 <Grid Grid.Row="2">
                     <Label Content="Скан образы:" FontSize="16" FontWeight="Bold" Margin="10,0" VerticalAlignment="Center"/>
-                    <Label Content="Для просмотра, нажмите два раза по скан-образу" FontSize="12" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="#FF8F8F8F"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Открыть" Height="24" Click="ImageOpen_click"/>
+                        <Label Content="выбран файл *" x:Name="Focu3" FontSize="14" Margin="10,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                    </StackPanel>
                 </Grid>
                 <Grid Grid.Row="3">
                     <WrapPanel x:Name="ImageBunch" ItemHeight="279" ItemWidth="210">

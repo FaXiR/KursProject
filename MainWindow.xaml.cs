@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -361,7 +362,7 @@ namespace KursProject
         #region код обзора документа
         private void ImageDelete(object sender, RoutedEventArgs e)
         {
-
+            //TODO: удаление файла
         } //Удаление изображения
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
@@ -461,6 +462,20 @@ namespace KursProject
             }
         }
         private int NowFilterIndex = 1;
+
+        private string SelectImageNoUse = null;
+        private string SelectImage
+        {
+            get
+            {
+                return SelectImageNoUse;
+            }
+            set
+            {
+                SelectImageNoUse = value;
+                Focu3.Content = "выбран файл " + value;
+            }
+        }
 
         //Для обзора дела
         private string _viewBusinessDateEnter
@@ -728,31 +743,37 @@ namespace KursProject
         {
             bool add = true;
             Image image = null;
+            string name = "IMG_" + tab.Table.Rows[i]["Путь_к_скан_образу"].ToString().Replace(".", "IMG_DOT");
 
             try
             {
                 image = new Image()
                 {
                     Source = new BitmapImage(new Uri(PreImageWay + tab.Table.Rows[i]["Путь_к_скан_образу"].ToString())),
-                    Margin = new Thickness(10)
+                    Margin = new Thickness(10),
+                    Name = name
                 };
-
+                image.MouseDown += ImageInBunch_MouseDown;
             }
             catch (NotSupportedException)
             {
                 image = new Image()
                 {
                     Source = new BitmapImage(new Uri("Source/FileNotImage.jpg", UriKind.Relative)),
-                    Margin = new Thickness(10)
+                    Margin = new Thickness(10),
+                    Name = name,
                 };
+                image.MouseDown += ImageInBunch_MouseDown;
             }
             catch (FileNotFoundException)
             {
                 image = new Image()
                 {
                     Source = new BitmapImage(new Uri("Source/FileNotFound.jpg", UriKind.Relative)),
-                    Margin = new Thickness(10)
+                    Margin = new Thickness(10),
+                    Name = name
                 };
+                image.MouseDown += ImageInBunch_MouseDown;
             }
             catch (Exception ex)
             {
@@ -827,6 +848,32 @@ namespace KursProject
             response += @"Комментарии = """ + _DocumentComment + @""" ";
             response += @"where Документ.Номер_документа = " + DocNum + @"";
             return response;
+        }
+        
+        private void ImageInBunch_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            string name = ((Image)e.OriginalSource).Name;
+            name = name.Substring(4);
+            name = name.Replace("IMG_DOT", ".");
+            SelectImage = name;
+        }
+
+        private void ImageOpen_click(object sender, RoutedEventArgs e)
+        {
+            if (SelectImage == "*")
+            {
+                MessageBox.Show("Озображение не выбрано");
+                return;
+            }
+            try
+            {
+                Process.Start(PreImageWay + SelectImage);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                return;
+            }
         }
         #endregion
     }
