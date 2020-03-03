@@ -135,17 +135,7 @@ namespace KursProject
                 return;
             }
 
-            if (DeleteRecord == BusinessView)
-            {
-                BusinessView =
-                _viewBusinessDateEnter =
-                _viewBusinessDateOpen =
-                _viewBusinessDatelose =
-                _viewBusinessWitness =
-                _viewBusinessComments =
-                _viewBusinessReason = "";
-                DaGr2.ItemsSource = "";
-            }
+            DropDelo(DeleteRecord);
         } //Удаление записи
         private void ListBusinessEnterClick(object sender, RoutedEventArgs e)
         {
@@ -250,15 +240,8 @@ namespace KursProject
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
             }
-            if (DocNum == DeleteRecord)
-            {
-                _DocumentName =
-                _DocumentCount =
-                _DocumentComment = "";
-                DocSet("", "");
 
-                ImageBunch.Children.Clear();
-            }
+            DropDocument(DeleteRecord);
         } //Удаление записи
         private void ListBusinessResetClick2(object sender, RoutedEventArgs e)
         {
@@ -280,16 +263,17 @@ namespace KursProject
             }
 
             string Business = UsAc.Request("SELECT MAX(Номер_документа) as Номер_документа From Документ").Table.Rows[0]["Номер_документа"].ToString();
+            if (Business == "")
+            {
+                Business = "0";
+            }
             long NewBusinessNum = Convert.ToInt64(Business) + 1;
 
-            UsAc.RequestWithResponse($@"INSERT INTO Документ (Номер_дела, Номер_документа) Values (""{BusinessView }"", ""{ NewBusinessNum.ToString()}"")");
+            UsAc.RequestWithResponse($@"INSERT INTO Документ (Номер_дела, Номер_документа) Values (""{BusinessView}"", ""{ NewBusinessNum.ToString()}"")");
 
-            DocSet(NewBusinessNum.ToString(), "*название документа*");
-
-            ViewDocumentLabel.Content = BusinessView + " - " + DocView;
+            DocSet(BusinessView, NewBusinessNum.ToString(), "*название документа*");
 
             ImageBunch.Children.Clear();
-
             ViewDocumentShow();
         } //Добавление записи
         private void ListBusinessEnterClick2(object sender, RoutedEventArgs e)
@@ -307,9 +291,7 @@ namespace KursProject
                 return;
             }
 
-            DocSet(tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString(), tab2.Table.Rows[DaGr2.SelectedIndex]["Название_документа"].ToString());
-
-            ViewDocumentLabel.Content = BusinessView + " - " + DocView;
+            DocSet(BusinessView, tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString(), tab2.Table.Rows[DaGr2.SelectedIndex]["Название_документа"].ToString());
 
             var timedTab = UsAc.Request($"SELECT * FROM Документ where Документ.Номер_документа = {DocNum}");
 
@@ -360,10 +342,44 @@ namespace KursProject
         #endregion
 
         #region код обзора документа
+        private void ImageOpen_click(object sender, RoutedEventArgs e)
+        {
+            if (BusinessView == "")
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusinessShow();
+                return;
+            }
+            if (DocNum == "")
+            {
+                MessageBox.Show("Документ не выбран");
+                ViewBusinessShow();
+                return;
+            }
+
+            OpenImage();
+        } //Открытие изображения
         private void ImageDelete(object sender, RoutedEventArgs e)
         {
-            //TODO: удаление файла
+            if (BusinessView == "")
+            {
+                MessageBox.Show("Дело не выбрано");
+                ListBusinessShow();
+                return;
+            }
+            if (DocNum == "")
+            {
+                MessageBox.Show("Документ не выбран");
+                ViewBusinessShow();
+                return;
+            }
+
+            DeleteImage();
         } //Удаление изображения
+        private void ImageInBunch_MouseDown(object sender, MouseButtonEventArgs e) //Выбор изображения (файла)
+        {
+            SelectImage(((Image)e.OriginalSource).Name);
+        }
         private void ImageUpdateReset(object sender, RoutedEventArgs e)
         {
             if (BusinessView == "")
@@ -420,7 +436,7 @@ namespace KursProject
             }
 
             UsAc.RequestWithResponse("UPDATE Документ SET " + FieldDocumentToSQLResponse());
-            DocSet(DocNum, _DocumentName);
+            DocSet(BusinessView, DocNum, _DocumentName);
 
         } //Код изменения содержимого
         #endregion
@@ -463,8 +479,8 @@ namespace KursProject
         }
         private int NowFilterIndex = 1;
 
-        private string SelectImageNoUse = null;
-        private string SelectImage
+        private string SelectImageNoUse = "*";
+        private string SelectedImage
         {
             get
             {
@@ -601,12 +617,14 @@ namespace KursProject
         /// <summary>
         /// Номер документа
         /// </summary>
-        string DocNum = null;
+        string DocNum = "";
 
         /// <summary>
         /// Название документа
         /// </summary>
-        string DocName = null;
+        string DocName = "";
+
+        string DocDelo = "";
 
         /// <summary>
         /// Если использовать set, то задает связку из номера и названия документа
@@ -714,8 +732,7 @@ namespace KursProject
 
         private string FieldViewBusinessToSQLResponse()
         {
-            string response = null;
-            response += @"Дата_введения_на_хранение = """ + _viewBusinessDateEnter + @""", ";
+            string response = @"Дата_введения_на_хранение = """ + _viewBusinessDateEnter + @""", ";
             response += @"Дата_открытия = """ + _viewBusinessDateOpen + @""", ";
             response += @"Дата_закрытия = """ + _viewBusinessDatelose + @""", ";
             response += @"Заверитель = """ + _viewBusinessWitness + @""", ";
@@ -725,11 +742,13 @@ namespace KursProject
             return response;
         }
 
-        private void DocSet(string docNum, string docName)
+        private void DocSet(string DocDel, string docNum, string docName)
         {
+            DocDelo = DocDel;
             DocNum = docNum;
             DocName = docName;
             DocView = ""; //нужная запись задастся сама
+            ViewDocumentLabel.Content = $"{DocDel} - {docNum} - {docName}";
         }
 
         private void TableRowsToFieldDocument(DataView tab)
@@ -837,42 +856,98 @@ namespace KursProject
 
             //Добавление записи к БД
             UsAc.RequestWithResponse($@"INSERT INTO Содержимое_документа (Номер_документа, Путь_к_скан_образу) Values ({DocNum}, ""{NewFileName + fileFormat}"")");
-
         }
 
         private string FieldDocumentToSQLResponse()
         {
-            string response = null;
-            response += @"Название_документа = """ + _DocumentName + @""", ";
+            string response = @"Название_документа = """ + _DocumentName + @""", ";
             response += @"Число_страниц = " + _DocumentCount + ", ";
             response += @"Комментарии = """ + _DocumentComment + @""" ";
             response += @"where Документ.Номер_документа = " + DocNum + @"";
             return response;
         }
-        
-        private void ImageInBunch_MouseDown(object sender, MouseButtonEventArgs e)
+
+        private void SelectImage(string name)
         {
-            string name = ((Image)e.OriginalSource).Name;
             name = name.Substring(4);
             name = name.Replace("IMG_DOT", ".");
-            SelectImage = name;
+            SelectedImage = name;
         }
 
-        private void ImageOpen_click(object sender, RoutedEventArgs e)
+        private void OpenImage()
         {
-            if (SelectImage == "*")
+            if (SelectedImage == "*")
             {
-                MessageBox.Show("Озображение не выбрано");
+                MessageBox.Show("Файл не выбран");
                 return;
             }
             try
             {
-                Process.Start(PreImageWay + SelectImage);
+                Process.Start(PreImageWay + SelectedImage);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
                 return;
+            }
+        }
+
+        private void DeleteImage()
+        {
+            if (SelectedImage == "*")
+            {
+                MessageBox.Show("Файл не выбрано");
+                return;
+            }
+
+            try
+            {
+                UsAc.RequestWithResponse($@"Delete FROM Содержимое_документа where Содержимое_документа.Номер_документа = {DocNum} and Содержимое_документа.Путь_к_файлу = {SelectedImage}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK);
+                return;
+            }
+        }
+
+        private void DropDocument(string DeletedDocument)
+        {
+            if (DeletedDocument == DocNum)
+            {
+                _DocumentName =
+                _DocumentCount =
+                _DocumentComment = "";
+                DocSet("", "", "");
+                SelectedImage = "*";
+
+                ImageBunch.Children.Clear();
+            }
+        }
+
+        private void DropDelo(string DeletedDelo)
+        {
+            if (DeletedDelo == BusinessView)
+            {
+                BusinessView =
+                _viewBusinessDateEnter =
+                _viewBusinessDateOpen =
+                _viewBusinessDatelose =
+                _viewBusinessWitness =
+                _viewBusinessComments =
+                _viewBusinessReason = "";
+                DaGr2.ItemsSource = "";
+            }
+
+            if (DeletedDelo == DocDelo)
+            {
+                _DocumentName =
+                _DocumentCount =
+                _DocumentComment = "";
+                DocSet("", "", "");
+                SelectedImage = "*";
+
+                ImageBunch.Children.Clear();
             }
         }
         #endregion

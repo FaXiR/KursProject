@@ -36,7 +36,7 @@
         </Grid>
         <Grid Grid.Column="1">
             <!-- Грид списка дел -->
-            <Grid x:Name="ListBusiness" Visibility="Hidden">
+            <Grid x:Name="ListBusiness" Visibility="Visible">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"/>
                     <RowDefinition Height="*"/>
@@ -135,7 +135,7 @@
             </Grid>
 
             <!-- Грид обозора декумента -->
-            <Grid x:Name="ViewDocument" Visibility="Visible">
+            <Grid x:Name="ViewDocument" Visibility="Hidden">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"/>
                     <RowDefinition Height="102"/>
