@@ -921,6 +921,7 @@ namespace KursProject
             try
             {
                 UsAc.RequestWithResponse($@"Delete FROM Содержимое_документа where Содержимое_документа.Номер_документа = {DocNum} and Содержимое_документа.Путь_к_скан_образу = ""{SelectedImage}""");
+                SelectedImage = "*";
             }
             catch (Exception ex)
             {
