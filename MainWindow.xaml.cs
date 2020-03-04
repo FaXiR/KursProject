@@ -273,6 +273,8 @@ namespace KursProject
 
             DocSet(BusinessView, NewBusinessNum.ToString(), "*название документа*");
 
+            SelectedImage = "*";
+
             ImageBunch.Children.Clear();
             ViewDocumentShow();
         } //Добавление записи
@@ -290,6 +292,8 @@ namespace KursProject
                 MessageBox.Show("Запись не выбрана");
                 return;
             }
+
+            DropDocument(DocNum);
 
             DocSet(BusinessView, tab2.Table.Rows[DaGr2.SelectedIndex]["Номер_документа"].ToString(), tab2.Table.Rows[DaGr2.SelectedIndex]["Название_документа"].ToString());
 
@@ -376,6 +380,8 @@ namespace KursProject
 
             DeleteImage();
 
+            SelectedImage = "*";
+
             DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
 
             ImageBunch.Children.Clear();
@@ -404,6 +410,8 @@ namespace KursProject
                 return;
             }
             DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
+
+            SelectedImage = "*";
 
             ImageBunch.Children.Clear();
 
