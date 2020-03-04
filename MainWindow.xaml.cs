@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.OleDb;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using KursProject.Modules;
 using Microsoft.Win32;
@@ -171,6 +164,11 @@ namespace KursProject
             if (changeBusiness.ShowDialog() == true)
             {
                 TimeBusiness = changeBusiness.Busi;
+                if (TimeBusiness.Replace(" ","") == "")
+                {
+                    MessageBox.Show("Нельзя добавить пустую запись");
+                    return;
+                }
             }
             else
             {
@@ -268,6 +266,8 @@ namespace KursProject
                 Business = "0";
             }
             long NewBusinessNum = Convert.ToInt64(Business) + 1;
+
+            DropDocument(DocNum);
 
             UsAc.RequestWithResponse($@"INSERT INTO Документ (Номер_дела, Номер_документа) Values (""{BusinessView}"", ""{ NewBusinessNum.ToString()}"")");
 
@@ -375,6 +375,15 @@ namespace KursProject
             }
 
             DeleteImage();
+
+            DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
+
+            ImageBunch.Children.Clear();
+
+            for (int i = 0; i < timedTab.Count; i++)
+            {
+                ImageAdd(timedTab, i);
+            }
         } //Удаление изображения
         private void ImageInBunch_MouseDown(object sender, MouseButtonEventArgs e) //Выбор изображения (файла)
         {
@@ -419,6 +428,15 @@ namespace KursProject
             }
 
             AddImageToBD();
+
+            DataView timedTab = UsAc.Request(@"SELECT * FROM Содержимое_документа where Содержимое_документа.Номер_документа = " + DocNum);
+
+            ImageBunch.Children.Clear();
+
+            for (int i = 0; i < timedTab.Count; i++)
+            {
+                ImageAdd(timedTab, i);
+            }
         } //Добавление скан образа
         private void DocumentSaveChanges(object sender, RoutedEventArgs e)
         {
@@ -833,6 +851,7 @@ namespace KursProject
             for (int i = 0; i < AllImage.Length; i++)
             {
                 AllImage[i] = AllImage[i].Substring(AllImage[i].LastIndexOf('/') + 1);
+                AllImage[i] = AllImage[i].Substring(AllImage[i].LastIndexOf('\\') + 1);
                 AllImage[i] = AllImage[i].Substring(0, AllImage[i].IndexOf('.'));
 
                 try
@@ -849,7 +868,6 @@ namespace KursProject
                 }
             }
             NewFileName++;
-            MessageBox.Show(NewFileName.ToString());
 
             //Копирование в папку image
             File.Copy(fileName, PreImageWay + NewFileName.ToString() + fileFormat);
@@ -902,7 +920,7 @@ namespace KursProject
 
             try
             {
-                UsAc.RequestWithResponse($@"Delete FROM Содержимое_документа where Содержимое_документа.Номер_документа = {DocNum} and Содержимое_документа.Путь_к_файлу = {SelectedImage}");
+                UsAc.RequestWithResponse($@"Delete FROM Содержимое_документа where Содержимое_документа.Номер_документа = {DocNum} and Содержимое_документа.Путь_к_скан_образу = ""{SelectedImage}""");
             }
             catch (Exception ex)
             {

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KursProject"
         mc:Ignorable="d"
-        Title="Архив дел" Height="450" Width="800" Closing="Window_Closing">
+        Title="Архив дел" MinHeight="516" MinWidth="827" Closing="Window_Closing" Height="516" Width="827">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>

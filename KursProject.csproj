@@ -34,6 +34,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Source\ico.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -108,6 +112,9 @@
   <ItemGroup>
     <Resource Include="Source\FileNotFound.jpg" />
     <Resource Include="Source\FileNotImage.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Source\ico.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
