@@ -33,6 +33,11 @@
                     <Label Content="" x:Name="ViewDoc" IsHitTestVisible="False" Margin="0,16,0,0" Foreground="#FF515151" />
                 </Grid>
             </StackPanel>
+
+            <Grid VerticalAlignment="Bottom">
+                <Rectangle Fill="#FFE5E5FF" MouseEnter="MoEnter" MouseLeave="MoLeave" MouseLeftButtonDown="InfoWindowShow"/>
+                <Label Content="О приложении" IsHitTestVisible="False" FontSize="14"/>               
+            </Grid>
         </Grid>
         <Grid Grid.Column="1">
             <!-- Грид списка дел -->

@@ -978,5 +978,11 @@ namespace KursProject
             }
         }
         #endregion
+
+        private void InfoWindowShow(object sender, MouseButtonEventArgs e)
+        {
+            var InfoWindow = new Windows.Info();
+            InfoWindow.ShowDialog(); 
+        }
     }
 }
