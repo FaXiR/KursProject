@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Modules\UsingDataView.cs" />
     <Compile Include="Windows\ChangeBusiness.xaml.cs">
       <DependentUpon>ChangeBusiness.xaml</DependentUpon>
     </Compile>
